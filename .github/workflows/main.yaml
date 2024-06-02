@@ -6,8 +6,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_APP: ${{ github.repository }}
-  IMAGE_NAME_SERVER: ${{ github.repository }}
+  IMAGE_NAME_APP: app-${{ github.repository }}
+  IMAGE_NAME_SERVER: server-${{ github.repository }}
 
 jobs:
   build-and-push-app-image:
