@@ -93,7 +93,7 @@ jobs:
       
       - name: Setup Tailscale DNS
         run: |
-          echo -e "[Resolve]\nDNS=100.100.100.100" /etc/systemd/resolved.conf.d/magic_dns.conf
+          echo -e "[Resolve]\nDNS=100.100.100.100" > /etc/systemd/resolved.conf.d/magic_dns.conf
           systemctl restart systemd-resolved
           systemd-resolve --status
 
