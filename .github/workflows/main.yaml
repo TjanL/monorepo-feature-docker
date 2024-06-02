@@ -90,6 +90,12 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
           version: 1.66.4
+      
+      - name: Setup Tailscale DNS
+        run: |
+          echo -e "[Resolve]\nDNS=100.100.100.100" /etc/systemd/resolved.conf.d/magic_dns.conf
+          systemctl restart systemd-resolved
+          systemd-resolve --status
 
       - name: Deploy App
         uses: TjanL/diplomska/actions/docker@main
@@ -100,7 +106,6 @@ jobs:
           ssh_user: bot
           ssh_host: node
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          dns_servers: nameserver 100.100.100.100
 
       - name: Deploy Database
         uses: TjanL/diplomska/actions/docker@main
@@ -112,7 +117,6 @@ jobs:
           ssh_user: bot
           ssh_host: node
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          dns_servers: nameserver 100.100.100.100
 
       - name: Deploy Server
         uses: TjanL/diplomska/actions/docker@main
@@ -124,4 +128,3 @@ jobs:
           ssh_user: bot
           ssh_host: node
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          dns_servers: nameserver 100.100.100.100
