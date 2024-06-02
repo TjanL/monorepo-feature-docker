@@ -89,13 +89,14 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
+          version: 1.66.4
 
       - name: Deploy App
         uses: TjanL/diplomska/actions/docker@main
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_APP }}
           container_name: app-${{ github.event.repository.name }}
-          container_ports: -p 8080:80
+          docker_ports: -p 8080:80
           ssh_user: bot
           ssh_host: node
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -117,7 +118,7 @@ jobs:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
           container_name: server-${{ github.event.repository.name }}
           docker_env: -e FRONTEND_HOST="http://localhost:8080" -e DATABASE_HOST="postgres://postgres:postgres@db/deploy"
-          container_ports: -p 8000:8000
+          docker_ports: -p 8000:8000
           ssh_user: bot
           ssh_host: node
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
