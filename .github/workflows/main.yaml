@@ -98,7 +98,7 @@ jobs:
           container_name: app-${{ github.event.repository.name }}
           docker_ports: -p 8080:80
           ssh_user: bot
-          ssh_host: node
+          ssh_host: 100.83.21.62
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy Database
@@ -109,7 +109,7 @@ jobs:
           docker_volumes: data
           docker_env: -e POSTGRES_PASSWORD="postgres" -e POSTGRES_USER="postgres" -e POSTGRES_DB="deploy"
           ssh_user: bot
-          ssh_host: node
+          ssh_host: 100.83.21.62
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy Server
@@ -120,5 +120,5 @@ jobs:
           docker_env: -e FRONTEND_HOST="http://localhost:8080" -e DATABASE_HOST="postgres://postgres:postgres@db/deploy"
           docker_ports: -p 8000:8000
           ssh_user: bot
-          ssh_host: node
+          ssh_host: 100.83.21.62
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
