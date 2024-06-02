@@ -1,0 +1,120 @@
+name: Create and publish a Docker image
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_APP: ${{ github.repository }}
+  IMAGE_NAME_SERVER: ${{ github.repository }}
+
+jobs:
+  build-and-push-app-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_APP }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: app
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            API_HOST="http://localhost:8000"
+            COMMIT="${{ github.sha }}"
+
+  build-and-push-server-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: server
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Deploy App
+        uses: TjanL/diplomska/actions/docker@main
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_APP }}
+          container_name: app-${{ github.event.repository.name }}
+          container_ports: -p 8080:80
+          ssh_user: bot
+          ssh_host: node
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy Database
+        uses: TjanL/diplomska/actions/docker@main
+        with:
+          image: postgres
+          container_name: db-${{ github.event.repository.name }}
+          docker_volumes: data
+          docker_env: -e POSTGRES_PASSWORD="postgres" -e POSTGRES_USER="postgres" -e POSTGRES_DB="deploy"
+          ssh_user: bot
+          ssh_host: node
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy Server
+        uses: TjanL/diplomska/actions/docker@main
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
+          container_name: server-${{ github.event.repository.name }}""
+          docker_env: -e FRONTEND_HOST="http://localhost:8080" -e DATABASE_HOST="postgres://postgres:postgres@db/deploy"
+          container_ports: -p 8000:8000
+          ssh_user: bot
+          ssh_host: node
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
