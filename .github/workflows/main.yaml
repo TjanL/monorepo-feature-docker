@@ -6,8 +6,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_APP: app-${{ github.repository }}
-  IMAGE_NAME_SERVER: server-${{ github.repository }}
+  IMAGE_NAME_APP: ${{ github.repository_owner }}/app-${{ github.event.repository.name }}
+  IMAGE_NAME_SERVER: ${{ github.repository_owner }}/server-${{ github.event.repository.name }}
 
 jobs:
   build-and-push-app-image:
@@ -115,7 +115,7 @@ jobs:
         uses: TjanL/diplomska/actions/docker@main
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
-          container_name: server-${{ github.event.repository.name }}""
+          container_name: server-${{ github.event.repository.name }}
           docker_env: -e FRONTEND_HOST="http://localhost:8080" -e DATABASE_HOST="postgres://postgres:postgres@db/deploy"
           container_ports: -p 8000:8000
           ssh_user: bot

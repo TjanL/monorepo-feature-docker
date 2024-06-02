@@ -3,8 +3,8 @@ on: pull_request
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_APP: ${{ github.repository }}
-  IMAGE_NAME_SERVER: ${{ github.repository }}
+  IMAGE_NAME_APP: ${{ github.repository_owner }}/app-${{ github.event.repository.name }}
+  IMAGE_NAME_SERVER: ${{ github.repository_owner }}/server-${{ github.event.repository.name }}
 
 jobs:
   build-and-push-app-image:
