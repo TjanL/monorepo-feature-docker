@@ -6,17 +6,12 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_APP: ${{ github.repository_owner }}/app-${{ github.event.repository.name }}
-  IMAGE_NAME_SERVER: ${{ github.repository_owner }}/server-${{ github.event.repository.name }}
+  IMAGE_NAME_APP: tjanl/app-${{ github.event.repository.name }}
+  IMAGE_NAME_SERVER: tjanl/server-${{ github.event.repository.name }}
 
 jobs:
   build-and-push-app-image:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,21 +39,9 @@ jobs:
           build-args: |
             API_HOST="http://localhost:8000"
             COMMIT="${{ github.sha }}"
-      
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
 
   build-and-push-server-image:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -83,13 +66,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
 
   deploy:
     runs-on: ubuntu-latest
