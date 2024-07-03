@@ -84,7 +84,7 @@ jobs:
       - name: Deploy App
         uses: TjanL/diplomska/actions/docker@main
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_APP }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_APP }}:main
           container_name: app-${{ github.event.repository.name }}
           docker_ports: -p 8080:80
           ssh_user: bot
@@ -105,7 +105,7 @@ jobs:
       - name: Deploy Server
         uses: TjanL/diplomska/actions/docker@main
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:main
           container_name: server-${{ github.event.repository.name }}
           docker_env: -e FRONTEND_HOST="http://localhost:8080" -e DATABASE_HOST="postgres://postgres:postgres@db/deploy"
           docker_ports: -p 8000:8000
