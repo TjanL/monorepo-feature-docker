@@ -78,13 +78,6 @@ jobs:
           tags: tag:ci
           version: 1.66.4
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHRC_TOKEN }}
-
       - name: Deploy Database
         uses: TjanL/diplomska/actions/docker/deploy@main
         with:
@@ -106,3 +99,6 @@ jobs:
           env_vars: "DATABASE_HOST=postgresql://postgres:postgres@database/deploy"
           ports: "8000:8000"
           network: "prod"
+          docker_registry: ${{ env.REGISTRY }}
+          docker_username: ${{ github.actor }}
+          docker_password: ${{ secrets.GHRC_TOKEN }}
